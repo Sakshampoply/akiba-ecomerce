@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand palette — bold, dark, anime-inspired */
+  --color-background: #0a0a0f;
+  --color-surface: #12121a;
+  --color-surface-2: #1a1a27;
+  --color-border: #2a2a3d;
+  --color-border-bright: #3d3d5c;
+
+  --color-foreground: #f0f0ff;
+  --color-foreground-muted: #8888aa;
+  --color-foreground-subtle: #555577;
+
+  /* Accent: electric crimson — anime energy */
+  --color-accent: #ff2d55;
+  --color-accent-hover: #ff4d6d;
+  --color-accent-muted: #3d1020;
+
+  /* Secondary: electric violet */
+  --color-secondary: #7c3aed;
+  --color-secondary-hover: #8b5cf6;
+  --color-secondary-muted: #1e1040;
+
+  /* Gold for badges, premium */
+  --color-gold: #f59e0b;
+  --color-gold-muted: #2d1f00;
+
+  /* Success / error */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-syne);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--color-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-bright);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-foreground-subtle);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Noise texture overlay for depth */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* Glow effects */
+.glow-accent {
+  box-shadow: 0 0 20px rgba(255, 45, 85, 0.3), 0 0 40px rgba(255, 45, 85, 0.1);
+}
+.glow-secondary {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 40px rgba(124, 58, 237, 0.1);
+}
+.text-glow-accent {
+  text-shadow: 0 0 20px rgba(255, 45, 85, 0.5);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #ff2d55 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient border */
+@keyframes border-spin {
+  from { --border-angle: 0deg; }
+  to { --border-angle: 360deg; }
+}
+
+.animated-border {
+  @property --border-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  animation: border-spin 4s linear infinite;
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 70%,
+    #ff2d55,
+    #7c3aed,
+    transparent
+  );
+}
+
+/* Scanline effect for hero sections */
+.scanlines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.05) 2px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
 }
