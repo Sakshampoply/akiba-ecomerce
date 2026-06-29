@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatPrice } from "@/lib/utils"
 import { getProducts, getCategories } from "@/features/catalog/repositories/product.repository"
+import { SortSelect } from "@/components/catalog/SortSelect"
 
 // Emoji map for products without images (demo)
 const EMOJI_MAP: Record<string, string> = {
@@ -20,21 +21,21 @@ const EMOJI_MAP: Record<string, string> = {
   "akiba-tote-bag-logo": "👜",
 }
 
-const SORT_OPTIONS = ["Newest", "Price: Low to High", "Price: High to Low", "Best Rated"]
-
 export const revalidate = 60
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; preorder?: string; q?: string }>
+  searchParams: Promise<{ category?: string; preorder?: string; q?: string; sort?: string }>
 }) {
   const params = await searchParams
+  const sort = (params.sort as "newest" | "price_asc" | "price_desc") || "newest"
   const [products, categories] = await Promise.all([
     getProducts({
       category: params.category,
       preorder: params.preorder === "true",
       q: params.q,
+      sort,
     }),
     getCategories(),
   ])
@@ -111,9 +112,7 @@ export default async function ProductsPage({
         <div className="flex-1">
           <div className="flex items-center justify-between mb-6">
             <p className="text-xs text-[#555577]">Showing {products.length} results</p>
-            <select className="text-xs bg-[#12121a] border border-[#2a2a3d] text-[#8888aa] rounded-sm px-3 py-1.5 focus:outline-none focus:border-[#ff2d55]">
-              {SORT_OPTIONS.map((opt) => <option key={opt}>{opt}</option>)}
-            </select>
+            <SortSelect current={sort} />
           </div>
 
           {products.length === 0 ? (

@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingCart, Search, User, Menu, X, Zap, LogOut, LayoutDashboard } from "lucide-react"
+import { ShoppingCart, User, Menu, X, Zap, LogOut, LayoutDashboard } from "lucide-react"
 import { useState } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { CartBadge } from "./CartBadge"
+import { SearchBar } from "./SearchBar"
 
 const NAV_LINKS = [
   { href: "/products", label: "All Products" },
@@ -49,12 +50,7 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-1">
-            <Link
-              href="/search"
-              className="flex items-center justify-center w-9 h-9 rounded-sm text-[#8888aa] hover:text-[#f0f0ff] hover:bg-[#1a1a27] transition-all"
-            >
-              <Search className="w-4 h-4" />
-            </Link>
+            <SearchBar />
 
             {/* User menu */}
             <div className="relative hidden sm:block">

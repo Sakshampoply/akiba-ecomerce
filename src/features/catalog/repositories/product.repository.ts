@@ -3,19 +3,30 @@ import { prisma } from "@/lib/prisma"
 export type ProductListItem = Awaited<ReturnType<typeof getProducts>>[0]
 export type ProductDetail = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>
 
+type SortOption = "newest" | "price_asc" | "price_desc"
+
 export async function getProducts({
   category,
   preorder,
   q,
+  sort = "newest",
   page = 1,
   limit = 12,
 }: {
   category?: string
   preorder?: boolean
   q?: string
+  sort?: SortOption
   page?: number
   limit?: number
 } = {}) {
+  const orderBy =
+    sort === "price_asc"
+      ? [{ variants: { _min: { price: "asc" as const } } }]
+      : sort === "price_desc"
+      ? [{ variants: { _min: { price: "desc" as const } } }]
+      : [{ createdAt: "desc" as const }]
+
   return prisma.product.findMany({
     where: {
       isActive: true,
@@ -37,7 +48,7 @@ export async function getProducts({
       variants: { where: { isDefault: true }, take: 1 },
       categories: { include: { category: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy,
     skip: (page - 1) * limit,
     take: limit,
   })

@@ -150,6 +150,9 @@ export default async function ProductDetailPage({
             <AddToCartButton
               productId={product.id}
               variantId={defaultVariant?.id ?? ""}
+              productName={product.name}
+              price={defaultVariant?.price ?? 0}
+              emoji={emoji}
               disabled={totalStock === 0 && !product.isPreOrder}
             />
             <Button size="lg" variant="outline" className="w-12 p-0">

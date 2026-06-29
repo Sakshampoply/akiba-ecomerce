@@ -11,15 +11,16 @@ interface Props {
   variantId: string
   productName?: string
   price?: number
+  emoji?: string
   disabled?: boolean
 }
 
-export function AddToCartButton({ productId, variantId, productName = "Item", price = 0, disabled }: Props) {
+export function AddToCartButton({ productId, variantId, productName = "Item", price = 0, emoji, disabled }: Props) {
   const addItem = useCartStore((s) => s.addItem)
   const [added, setAdded] = useState(false)
 
   function handleAdd() {
-    addItem({ id: variantId, productId, variantId, productName, variantLabel: "Standard", price })
+    addItem({ id: variantId, productId, variantId, productName, variantLabel: "Standard", price, emoji })
     setAdded(true)
     toast({ title: "Added to cart", description: productName, variant: "success" })
     setTimeout(() => setAdded(false), 2000)
