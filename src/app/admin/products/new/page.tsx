@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { ImageUploader, type ImageEntry } from "@/components/admin/ImageUploader"
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
@@ -16,6 +17,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+  const [images, setImages] = useState<ImageEntry[]>([])
 
   const [form, setForm] = useState({
     name: "", slug: "", brand: "", description: "", categoryId: "", isPreOrder: false,
@@ -40,10 +42,12 @@ export default function NewProductPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: form.name,
+        slug: form.slug || slugify(form.name),
         description: form.description,
         brand: form.brand,
         isPreOrder: form.isPreOrder,
         categoryId: form.categoryId || undefined,
+        images: images.map((img, i) => ({ url: img.url, altText: img.altText || form.name, position: i })),
         variants: [{
           sku: form.sku,
           price: parseFloat(form.price),
@@ -122,6 +126,11 @@ export default function NewProductPage() {
               className="w-4 h-4 rounded border-[#2a2a3d] bg-[#0a0a0f] accent-[#ff2d55]" />
             <span className="text-xs text-[#8888aa]">This is a pre-order product</span>
           </label>
+        </div>
+
+        <div className="rounded-sm border border-[#2a2a3d] bg-[#12121a] p-6 space-y-4">
+          <h2 className="text-sm font-black text-[#f0f0ff]">Images</h2>
+          <ImageUploader images={images} onChange={setImages} />
         </div>
 
         <div className="rounded-sm border border-[#2a2a3d] bg-[#12121a] p-6 space-y-4">

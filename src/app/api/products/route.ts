@@ -10,13 +10,13 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { name, description, brand, isPreOrder, categoryId, variants } = body
+  const { name, description, brand, isPreOrder, categoryId, variants, images = [], slug: bodySlug } = body
 
   if (!name || !variants?.length) {
     return NextResponse.json({ error: "Name and at least one variant required" }, { status: 400 })
   }
 
-  const slug = slugify(name)
+  const slug = bodySlug || slugify(name)
   const existing = await prisma.product.findUnique({ where: { slug } })
   if (existing) {
     return NextResponse.json({ error: "A product with this name already exists" }, { status: 409 })
@@ -40,11 +40,18 @@ export async function POST(req: NextRequest) {
           isDefault: i === 0,
         })),
       },
+      images: images.length
+        ? { create: images.map((img: { url: string; altText?: string; position?: number }) => ({
+            url: img.url,
+            altText: img.altText ?? null,
+            position: img.position ?? 0,
+          })) }
+        : undefined,
       categories: categoryId
         ? { create: { categoryId } }
         : undefined,
     },
-    include: { variants: true },
+    include: { variants: true, images: true },
   })
 
   return NextResponse.json(product, { status: 201 })
