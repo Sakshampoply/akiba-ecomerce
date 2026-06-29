@@ -20,14 +20,9 @@ export async function getProducts({
   page?: number
   limit?: number
 } = {}) {
-  const orderBy =
-    sort === "price_asc"
-      ? [{ variants: { _min: { price: "asc" as const } } }]
-      : sort === "price_desc"
-      ? [{ variants: { _min: { price: "desc" as const } } }]
-      : [{ createdAt: "desc" as const }]
+  const isPriceSort = sort === "price_asc" || sort === "price_desc"
 
-  return prisma.product.findMany({
+  const rows = await prisma.product.findMany({
     where: {
       isActive: true,
       ...(preorder ? { isPreOrder: true } : {}),
@@ -48,10 +43,19 @@ export async function getProducts({
       variants: { where: { isDefault: true }, take: 1 },
       categories: { include: { category: true } },
     },
-    orderBy,
-    skip: (page - 1) * limit,
-    take: limit,
+    orderBy: isPriceSort ? undefined : { createdAt: "desc" },
+    skip: isPriceSort ? undefined : (page - 1) * limit,
+    take: isPriceSort ? undefined : limit,
   })
+
+  if (!isPriceSort) return rows
+
+  const sorted = rows.slice().sort((a, b) => {
+    const pa = a.variants[0]?.price ?? 0
+    const pb = b.variants[0]?.price ?? 0
+    return sort === "price_asc" ? pa - pb : pb - pa
+  })
+  return sorted.slice((page - 1) * limit, page * limit)
 }
 
 export async function getProductBySlug(slug: string) {
