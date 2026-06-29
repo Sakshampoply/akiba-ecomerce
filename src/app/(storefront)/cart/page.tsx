@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Tag, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,9 +64,13 @@ export default function CartPage() {
                 key={item.variantId}
                 className="flex gap-4 p-4 rounded-sm border border-[#2a2a3d] bg-[#12121a]"
               >
-                {/* Image placeholder */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-sm bg-gradient-to-br from-[#1a1a27] to-[#0a0a0f] flex items-center justify-center text-3xl">
-                  {item.emoji ?? EMOJI_MAP[item.productId] ?? "📦"}
+                {/* Image */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-sm bg-gradient-to-br from-[#1a1a27] to-[#0a0a0f] flex items-center justify-center text-3xl overflow-hidden relative">
+                  {item.imageUrl ? (
+                    <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" />
+                  ) : (
+                    item.emoji ?? EMOJI_MAP[item.productId] ?? "📦"
+                  )}
                 </div>
 
                 <div className="flex flex-col flex-1 min-w-0">

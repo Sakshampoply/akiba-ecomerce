@@ -1,12 +1,14 @@
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
-import { Star, Truck, Shield, ArrowLeft, ShoppingCart, Heart } from "lucide-react"
+import { Star, Truck, Shield, ArrowLeft, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
 import { getProductBySlug, getProducts } from "@/features/catalog/repositories/product.repository"
 import { AddToCartButton } from "@/features/cart/components/AddToCartButton"
 import { QuantitySelector } from "@/features/cart/components/QuantitySelector"
+import { ProductCard } from "@/components/catalog/ProductCard"
 
 const EMOJI_MAP: Record<string, string> = {
   "tanjiro-kamado-1-7-scale": "⚔️",
@@ -47,9 +49,10 @@ export default async function ProductDetailPage({
   const defaultVariant = product.variants.find((v) => v.isDefault) ?? product.variants[0]
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0)
   const emoji = EMOJI_MAP[product.slug] ?? "📦"
+  const images = product.images ?? []
+  const mainImage = images[0]
 
-  // Related products
-  const related = await getProducts({ limit: 3 })
+  const related = await getProducts({ limit: 4 })
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -63,25 +66,40 @@ export default async function ProductDetailPage({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-        {/* Image */}
+        {/* Images */}
         <div className="space-y-3">
+          {/* Main image */}
           <div className="relative aspect-square rounded-sm bg-gradient-to-br from-[#1a1a27] to-[#0a0a0f] flex items-center justify-center overflow-hidden border border-[#2a2a3d]">
-            <span className="text-[10rem]">{emoji}</span>
+            {mainImage ? (
+              <Image
+                src={mainImage.url}
+                alt={mainImage.altText ?? product.name}
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <span className="text-[10rem]">{emoji}</span>
+            )}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               {product.isPreOrder && <Badge variant="secondary">Pre-Order</Badge>}
               {defaultVariant?.compareAt && <Badge variant="error">Sale</Badge>}
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className={`aspect-square rounded-sm border ${i === 1 ? "border-[#ff2d55]" : "border-[#2a2a3d] hover:border-[#3d3d5c]"} bg-gradient-to-br from-[#1a1a27] to-[#0a0a0f] flex items-center justify-center cursor-pointer transition-all`}
-              >
-                <span className="text-2xl">{emoji}</span>
-              </div>
-            ))}
-          </div>
+
+          {/* Thumbnails */}
+          {images.length > 1 && (
+            <div className="grid grid-cols-4 gap-2">
+              {images.slice(0, 4).map((img, i) => (
+                <div
+                  key={img.id}
+                  className={`relative aspect-square rounded-sm border overflow-hidden cursor-pointer transition-all ${i === 0 ? "border-[#ff2d55]" : "border-[#2a2a3d] hover:border-[#3d3d5c]"}`}
+                >
+                  <Image src={img.url} alt={img.altText ?? product.name} fill className="object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -91,7 +109,6 @@ export default async function ProductDetailPage({
             {product.name}
           </h1>
 
-          {/* Rating */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -102,7 +119,6 @@ export default async function ProductDetailPage({
             <span className="text-sm text-[#555577]">Verified product</span>
           </div>
 
-          {/* Price */}
           <div className="flex items-baseline gap-3 mb-6">
             <span className="text-3xl font-black text-[#f0f0ff]" style={{ fontFamily: "var(--font-syne)" }}>
               {defaultVariant ? formatPrice(defaultVariant.price) : "—"}
@@ -115,7 +131,6 @@ export default async function ProductDetailPage({
             )}
           </div>
 
-          {/* Variants */}
           {product.variants.length > 1 && (
             <div className="mb-6">
               <p className="text-xs font-bold tracking-widest uppercase text-[#555577] mb-3">
@@ -139,13 +154,11 @@ export default async function ProductDetailPage({
             </div>
           )}
 
-          {/* Quantity */}
           <div className="mb-6">
             <p className="text-xs font-bold tracking-widest uppercase text-[#555577] mb-3">Quantity</p>
             <QuantitySelector max={totalStock} />
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3 mb-8">
             <AddToCartButton
               productId={product.id}
@@ -153,6 +166,7 @@ export default async function ProductDetailPage({
               productName={product.name}
               price={defaultVariant?.price ?? 0}
               emoji={emoji}
+              imageUrl={mainImage?.url}
               disabled={totalStock === 0 && !product.isPreOrder}
             />
             <Button size="lg" variant="outline" className="w-12 p-0">
@@ -160,7 +174,6 @@ export default async function ProductDetailPage({
             </Button>
           </div>
 
-          {/* Trust */}
           <div className="grid grid-cols-2 gap-3 mb-8 p-4 rounded-sm bg-[#12121a] border border-[#2a2a3d]">
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-[#10b981]" />
@@ -178,7 +191,6 @@ export default async function ProductDetailPage({
             </div>
           </div>
 
-          {/* Stock info */}
           {totalStock > 0 && totalStock <= 10 && !product.isPreOrder && (
             <div className="p-3 rounded-sm bg-[#f59e0b]/10 border border-[#f59e0b]/20 mb-4">
               <p className="text-xs text-[#f59e0b] font-semibold">⚡ Only {totalStock} left in stock — order soon!</p>
@@ -202,29 +214,12 @@ export default async function ProductDetailPage({
             You may also like
           </h2>
           <Link href="/products" className="flex items-center gap-1 text-sm text-[#8888aa] hover:text-[#ff2d55] transition-colors">
-            <ArrowLeft className="w-4 h-4 rotate-180" />
-            View all
+            <ArrowLeft className="w-4 h-4 rotate-180" /> View all
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {related.filter((p) => p.slug !== slug).slice(0, 3).map((p) => (
-            <Link
-              key={p.slug}
-              href={`/products/${p.slug}`}
-              className="group flex flex-col rounded-sm border border-[#2a2a3d] bg-[#12121a] overflow-hidden hover:border-[#3d3d5c] transition-all hover:-translate-y-1"
-            >
-              <div className="aspect-square bg-gradient-to-br from-[#1a1a27] to-[#0a0a0f] flex items-center justify-center">
-                <span className="text-5xl group-hover:scale-110 transition-transform duration-500">
-                  {EMOJI_MAP[p.slug] ?? "📦"}
-                </span>
-              </div>
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-[#f0f0ff] mb-1 line-clamp-2">{p.name}</h3>
-                <span className="text-sm font-black text-[#f0f0ff]">
-                  {p.variants[0] ? formatPrice(p.variants[0].price) : "—"}
-                </span>
-              </div>
-            </Link>
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       </div>

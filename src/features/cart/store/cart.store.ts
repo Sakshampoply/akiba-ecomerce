@@ -11,6 +11,7 @@ export interface CartItem {
   compareAt?: number
   quantity: number
   emoji?: string
+  imageUrl?: string
 }
 
 interface CartState {
